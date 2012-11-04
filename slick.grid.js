@@ -228,7 +228,7 @@ if (typeof Slick === "undefined") {
 
       $focusSink = $("<div tabIndex='0' hideFocus style='position:fixed;width:0;height:0;top:0;left:0;outline:0;'></div>").appendTo($container);
 
-      $headerScroller = $("<div class='slick-header ui-state-default' style='overflow:hidden;position:relative;' />").appendTo($container);
+      $headerScroller = $("<div class='slick-header ui-widget-header' style='overflow:hidden;position:relative;' />").appendTo($container);
       $headers = $("<div class='slick-header-columns' style='left:-1000px' />").appendTo($headerScroller);
       $headers.width(getHeadersWidth());
 
@@ -365,6 +365,10 @@ if (typeof Slick === "undefined") {
         height: $c.height() - $c[0].clientHeight
       };
       $c.remove();
+      
+      // safari on lion/mountain-lion doesn't return scrollbar width...use a hardcoded value
+      if (dim.width == 0) { dim.width = 15; }
+      
       return dim;
     }
 
@@ -542,7 +546,7 @@ if (typeof Slick === "undefined") {
       for (var i = 0; i < columns.length; i++) {
         var m = columns[i];
 
-        var header = $("<div class='ui-state-default slick-header-column' id='" + uid + m.id + "' />")
+        var header = $("<div class='ui-widget-header slick-header-column' id='" + uid + m.id + "' />")
             .html("<span class='slick-column-name'>" + m.name + "</span>")
             .width(m.width - headerColumnWidthDiff)
             .attr("title", m.toolTip || "")
@@ -656,7 +660,7 @@ if (typeof Slick === "undefined") {
         cursor: "default",
         tolerance: "intersection",
         helper: "clone",
-        placeholder: "slick-sortable-placeholder ui-state-default slick-header-column",
+        placeholder: "slick-sortable-placeholder ui-widget-header slick-header-column",
         forcePlaceholderSize: true,
         start: function (e, ui) {
           $(ui.helper).addClass("slick-header-column-active");
@@ -867,7 +871,7 @@ if (typeof Slick === "undefined") {
       var h = ["borderLeftWidth", "borderRightWidth", "paddingLeft", "paddingRight"];
       var v = ["borderTopWidth", "borderBottomWidth", "paddingTop", "paddingBottom"];
 
-      el = $("<div class='ui-state-default slick-header-column' style='visibility:hidden'>-</div>").appendTo($headers);
+      el = $("<div class='ui-widget-header slick-header-column' style='visibility:hidden'>-</div>").appendTo($headers);
       headerColumnWidthDiff = headerColumnHeightDiff = 0;
       $.each(h, function (n, val) {
         headerColumnWidthDiff += parseFloat(el.css(val)) || 0;
@@ -1007,7 +1011,8 @@ if (typeof Slick === "undefined") {
           shrinkLeeway = 0,
           total = 0,
           prevTotal,
-          availWidth = viewportHasVScroll ? viewportW - scrollbarDimensions.width : viewportW;
+          //availWidth = viewportHasVScroll ? viewportW - scrollbarDimensions.width : viewportW;
+          availWidth = viewportW - scrollbarDimensions.width;
 
       for (i = 0; i < columns.length; i++) {
         c = columns[i];
