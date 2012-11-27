@@ -1118,7 +1118,7 @@ if (typeof Slick === "undefined") {
       headerColumnEls
           .removeClass("slick-header-column-sorted")
           .find(".slick-sort-indicator")
-              .removeClass("slick-sort-indicator-asc slick-sort-indicator-desc");
+              .removeClass("ui-icon ui-icon-arrowthick-1-n ui-icon-arrowthick-1-s");
 
       $.each(sortColumns, function(i, col) {
         if (col.sortAsc == null) {
@@ -1129,7 +1129,7 @@ if (typeof Slick === "undefined") {
           headerColumnEls.eq(columnIndex)
               .addClass("slick-header-column-sorted")
               .find(".slick-sort-indicator")
-                  .addClass(col.sortAsc ? "slick-sort-indicator-asc" : "slick-sort-indicator-desc");
+                  .addClass(col.sortAsc ? "ui-icon ui-icon-arrowthick-1-n" : "ui-icon ui-icon-arrowthick-1-s");
         }
       });
     }
