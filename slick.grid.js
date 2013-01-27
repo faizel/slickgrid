@@ -114,7 +114,7 @@ if (typeof Slick === "undefined") {
     var $container;
     var uid = "slickgrid_" + Math.round(1000000 * Math.random());
     var self = this;
-    var $focusSink;
+    var $focusSink, $focusSink2;
     var $headerScroller;
     var $headers;
     var $headerRow, $headerRowScroller, $headerRowSpacer;
@@ -133,6 +133,7 @@ if (typeof Slick === "undefined") {
     var absoluteColumnMinWidth;
     var numberOfRows = 0;
 
+    var tabbingDirection = 1;
     var activePosX;
     var activeRow, activeCell;
     var activeCellNode = null;
@@ -254,6 +255,8 @@ if (typeof Slick === "undefined") {
 
       $canvas = $("<div class='grid-canvas' />").appendTo($viewport);
 
+      $focusSink2 = $focusSink.clone().appendTo($container);
+
       if (!options.explicitInitialization) {
         finishInitialization();
       }
@@ -302,7 +305,7 @@ if (typeof Slick === "undefined") {
             .delegate(".slick-header-column", "mouseleave", handleHeaderMouseLeave);
         $headerRowScroller
             .bind("scroll", handleHeaderRowScroll);
-        $focusSink
+        $focusSink.add($focusSink2)
             .bind("keydown", handleKeyDown);
         $canvas
             .bind("keydown", handleKeyDown)
@@ -310,7 +313,7 @@ if (typeof Slick === "undefined") {
             .bind("dblclick", handleDblClick)
             .bind("contextmenu", handleContextMenu)
             .bind("draginit", handleDragInit)
-            .bind("dragstart", handleDragStart)
+            .bind("dragstart", {distance: 3}, handleDragStart)
             .bind("drag", handleDrag)
             .bind("dragend", handleDragEnd)
             .delegate(".slick-cell", "mouseenter", handleMouseEnter)
@@ -424,7 +427,7 @@ if (typeof Slick === "undefined") {
     function getMaxSupportedCssHeight() {
       var supportedHeight = 1000000;
       // FF reports the height back but still renders blank after ~6M px
-      var testUpTo = ($.browser.mozilla) ? 6000000 : 1000000000;
+      var testUpTo = navigator.userAgent.toLowerCase().match(/firefox/) ? 6000000 : 1000000000;
       var div = $("<div style='display:none' />").appendTo(document.body);
 
       while (true) {
@@ -510,11 +513,11 @@ if (typeof Slick === "undefined") {
     }
 
     function createColumnHeaders() {
-      function hoverBegin() {
+      function onMouseEnter() {
         $(this).addClass("ui-state-hover");
       }
 
-      function hoverEnd() {
+      function onMouseLeave() {
         $(this).removeClass("ui-state-hover");
       }
 
@@ -555,10 +558,13 @@ if (typeof Slick === "undefined") {
             .appendTo($headers);
 
         if (options.enableColumnReorder || m.sortable) {
-          header.hover(hoverBegin, hoverEnd);
+          header
+            .on('mouseenter', onMouseEnter)
+            .on('mouseleave', onMouseLeave);
         }
 
         if (m.sortable) {
+          header.addClass("slick-header-sortable");
           header.append("<span class='slick-sort-indicator' />");
         }
 
@@ -653,9 +659,10 @@ if (typeof Slick === "undefined") {
     }
 
     function setupColumnReorder() {
-      $headers.sortable("destroy");
+      $headers.filter(":ui-sortable").sortable("destroy");
       $headers.sortable({
         containment: "parent",
+        distance: 3,
         axis: "x",
         cursor: "default",
         tolerance: "intersection",
@@ -1012,8 +1019,7 @@ if (typeof Slick === "undefined") {
           total = 0,
           prevTotal,
           //availWidth = viewportHasVScroll ? viewportW - scrollbarDimensions.width : viewportW;
-          availWidth = viewportW - scrollbarDimensions.width;
-
+		  availWidth = viewportW - scrollbarDimensions.width;
       for (i = 0; i < columns.length; i++) {
         c = columns[i];
         widths.push(c.width);
@@ -1993,7 +1999,7 @@ if (typeof Slick === "undefined") {
           if (m.asyncPostRender && !postProcessedRows[row][columnIdx]) {
             var node = cacheEntry.cellNodesByColumnIdx[columnIdx];
             if (node) {
-              m.asyncPostRender(node, postProcessFromRow, getDataItem(row), m);
+              m.asyncPostRender(node, row, getDataItem(row), m);
             }
             postProcessedRows[row][columnIdx] = true;
           }
@@ -2368,7 +2374,11 @@ if (typeof Slick === "undefined") {
     }
 
     function setFocus() {
-      $focusSink[0].focus();
+      if (tabbingDirection == -1) {
+        $focusSink[0].focus();
+      } else {
+        $focusSink2[0].focus();
+      }
     }
 
     function scrollCellIntoView(row, cell) {
@@ -2808,6 +2818,7 @@ if (typeof Slick === "undefined") {
         }
       }
 
+
       var pos = gotoRight(row, cell, posX);
       if (pos) {
         return pos;
@@ -2839,6 +2850,7 @@ if (typeof Slick === "undefined") {
           };
         }
       }
+
 
       var pos;
       var lastSelectableCell;
@@ -2897,14 +2909,26 @@ if (typeof Slick === "undefined") {
         return false;
       }
 
+
       if (!activeCellNode && dir != "prev" && dir != "next") {
         return false;
       }
+
 
       if (!getEditorLock().commitCurrentEdit()) {
         return true;
       }
       setFocus();
+
+      var tabbingDirections = {
+        "up": -1,
+        "down": 1,
+        "left": -1,
+        "right": 1,
+        "prev": -1,
+        "next": 1
+      };
+      tabbingDirection = tabbingDirections[dir];
 
       var stepFunctions = {
         "up": gotoUp,
