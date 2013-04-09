@@ -26,6 +26,7 @@ classes should alter those!
   position: relative;
   display: inline-block;
   overflow: hidden;
+  -o-text-overflow: ellipsis;
   text-overflow: ellipsis;
   height: 16px;
   line-height: 16px;
@@ -98,21 +99,17 @@ classes should alter those!
 
 .slick-cell, .slick-headerrow-column {
   position: absolute;
-
   border: 1px solid transparent;
   border-right: 1px dotted silver;		/* themeable */
   border-bottom-color: silver;			/* themeable */
-
   overflow: hidden;
+  -o-text-overflow: ellipsis;
   text-overflow: ellipsis;
-  white-space: nowrap;
   vertical-align: middle;
   z-index: 1;
   padding: 1px 2px 2px 1px;
   margin: 0;
-
   white-space: nowrap;
-
   cursor: default;
 }
 
@@ -132,6 +129,7 @@ classes should alter those!
   background: rgba(0, 0, 255, 0.2);
   -webkit-transition: all 0.5s;
   -moz-transition: all 0.5s;
+  -o-transition: all 0.5s;
   transition: all 0.5s;
 }
 

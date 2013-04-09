@@ -95,7 +95,9 @@ if (typeof Slick === "undefined") {
       minWidth: 30,
       rerenderOnResize: false,
       headerCssClass: null,
-      defaultSortAsc: true
+      defaultSortAsc: true,
+      focusable: true,
+      selectable: true
     };
 
     // scroller
@@ -2106,7 +2108,7 @@ if (typeof Slick === "undefined") {
         return false;
       }
 
-      retval = trigger(self.onDragInit, dd, e);
+      var retval = trigger(self.onDragInit, dd, e);
       if (e.isImmediatePropagationStopped()) {
         return retval;
       }
@@ -2381,7 +2383,9 @@ if (typeof Slick === "undefined") {
       }
     }
 
-    function scrollCellIntoView(row, cell) {
+    function scrollCellIntoView(row, cell, doPaging) {
+      scrollRowIntoView(row, doPaging);
+
       var colspan = getColspan(row, cell);
       var left = columnPosLeft[cell],
         right = columnPosRight[cell + (colspan > 1 ? colspan - 1 : 0)],
@@ -2488,7 +2492,7 @@ if (typeof Slick === "undefined") {
 
       // if there previously was text selected on a page (such as selected text in the edit cell just removed),
       // IE can't set focus to anything else correctly
-      if ($.browser.msie) {
+      if (navigator.userAgent.toLowerCase().match(/msie/)) {
         clearTextSelection();
       }
 
@@ -2942,8 +2946,7 @@ if (typeof Slick === "undefined") {
       var pos = stepFn(activeRow, activeCell, activePosX);
       if (pos) {
         var isAddNewRow = (pos.row == getDataLength());
-        scrollRowIntoView(pos.row, !isAddNewRow);
-        scrollCellIntoView(pos.row, pos.cell);
+        scrollCellIntoView(pos.row, pos.cell, !isAddNewRow);
         setActiveCellInternal(getCellNode(pos.row, pos.cell), isAddNewRow || options.autoEdit);
         activePosX = pos.posX;
         return true;
@@ -2971,8 +2974,7 @@ if (typeof Slick === "undefined") {
         return;
       }
 
-      scrollRowIntoView(row, false);
-      scrollCellIntoView(row, cell);
+      scrollCellIntoView(row, cell, false);
       setActiveCellInternal(getCellNode(row, cell), false);
     }
 
@@ -2995,11 +2997,7 @@ if (typeof Slick === "undefined") {
         return columnMetadata[cell].focusable;
       }
 
-      if (typeof columns[cell].focusable === "boolean") {
-        return columns[cell].focusable;
-      }
-
-      return true;
+      return columns[cell].focusable;
     }
 
     function canCellBeSelected(row, cell) {
@@ -3017,11 +3015,7 @@ if (typeof Slick === "undefined") {
         return columnMetadata.selectable;
       }
 
-      if (typeof columns[cell].selectable === "boolean") {
-        return columns[cell].selectable;
-      }
-
-      return true;
+      return columns[cell].selectable;
     }
 
     function gotoCell(row, cell, forceEdit) {
@@ -3034,8 +3028,7 @@ if (typeof Slick === "undefined") {
         return;
       }
 
-      scrollRowIntoView(row, false);
-      scrollCellIntoView(row, cell);
+      scrollCellIntoView(row, cell, false);
 
       var newCell = getCellNode(row, cell);
 
